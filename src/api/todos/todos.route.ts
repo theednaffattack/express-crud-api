@@ -1,15 +1,13 @@
 import Router, { Response } from "express";
-import { TodoType } from "./todos.model";
+import { TodosCollection as Todos, TodoTypeWithId } from "./todos.model";
 
 const router = Router();
 
-router.get("/", (req, res: Response<TodoType[]>) => {
-  res.json([
-    {
-      content: "A string",
-      done: false,
-    },
-  ]);
+router.get("/", async (req, res: Response<TodoTypeWithId[]>) => {
+  const result = Todos.find();
+  const todos = await result.toArray();
+  console.log("VIEW TODOS", { todos });
+  res.json(todos);
 });
 
 export { router };
