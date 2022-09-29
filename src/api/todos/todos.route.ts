@@ -1,15 +1,8 @@
-import Router, { Response } from "express";
-import { TodoType } from "./todos.model";
+import Router from "express";
+import * as TodosHandlers from "./todos.handlers";
 
 const router = Router();
 
-router.get("/", (req, res: Response<TodoType[]>) => {
-  res.json([
-    {
-      content: "A string",
-      done: false,
-    },
-  ]);
-});
+router.get("/", TodosHandlers.findAll);
 
 export { router };

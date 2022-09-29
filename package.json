@@ -10,7 +10,11 @@
     "build": "tsc",
     "lint": "eslint --fix src test",
     "test": "jest",
-    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
+    "spinup": "docker-compose -f docker-compose-mongo-local.yml up -d",
+    "spindown": "docker-compose -f docker-compose-mongo-local.yml down",
+    "mongo-container-id": "docker ps -aqf 'name=^mongo-crud-db$'",
+    "mongo-start": "docker run -p 27017:27017 --name mongo-crud-db mongo"
   },
   "keywords": [],
   "author": "CJ R. <cj@null.computer> (https://w3cj.now.sh)",
