@@ -5,4 +5,6 @@ const router = Router();
 
 router.get("/", TodosHandlers.findAll);
 
+router.post("/", TodosHandlers.createOne);
+
 export { router };

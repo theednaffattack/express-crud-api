@@ -1,6 +1,6 @@
 // Adapted from: https://www.youtube.com/watch?v=ITogH7lJTyE&ab_channel=Fireship
 
-export async function asyncWrap<PReturn>(
+export async function wrapAsync<PReturn>(
   promise: () => Promise<PReturn>
 ): Promise<[PReturn | null, unknown | null]> {
   try {
