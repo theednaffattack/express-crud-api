@@ -1,13 +1,13 @@
 import { WithId } from "mongodb";
-import * as z from "zod";
+import * as zod from "zod";
 import { mongoDb, mongoClient } from "../../db";
 
-export const Todo = z.object({
-  content: z.string().min(1),
-  done: z.boolean().default(false),
+export const Todo = zod.object({
+  content: zod.string().min(1),
+  done: zod.boolean().default(false),
 });
 
-export type TodoType = z.infer<typeof Todo>;
+export type TodoType = zod.infer<typeof Todo>;
 export type TodoTypeWithId = WithId<TodoType>;
 
 export const TodosCollection = mongoDb.collection<TodoType>("todos");
