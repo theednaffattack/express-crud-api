@@ -10,31 +10,6 @@ import {
   TodoTypeWithId,
 } from "./todos.model";
 
-export async function findAll(
-  _req: Request,
-  res: Response<TodoTypeWithId[]>,
-  next: NextFunction
-) {
-  const result = TodosCollection.find();
-  const [todos, todosError] = await wrapAsync(() => result.toArray());
-  // Deal with any errors
-  if (todosError) {
-    console.error(todosError);
-    next(todosError);
-  }
-  if (todos) {
-    res.json(todos);
-  } else {
-    // If there are no todos and no todosError we have no idea what
-    // went wrong, so throw an error.
-    const error = {
-      message: "An unknown error connecting to database has occurred.",
-    };
-    console.error(error);
-    next(error);
-  }
-}
-
 export async function createOne(
   req: Request<{}, InsertOneResult<TodoType>, TodoType>,
   res: Response,
@@ -85,4 +60,29 @@ export async function createOne(
   // Send JSON results back to the client
   res.status(httpStatusCodes[201].code);
   res.json({ ...req.body, _id: insertedTodo.insertedId });
+}
+
+export async function findAll(
+  _req: Request,
+  res: Response<TodoTypeWithId[]>,
+  next: NextFunction
+) {
+  const result = TodosCollection.find();
+  const [todos, todosError] = await wrapAsync(() => result.toArray());
+  // Deal with any errors
+  if (todosError) {
+    console.error(todosError);
+    next(todosError);
+  }
+  if (todos) {
+    res.json(todos);
+  } else {
+    // If there are no todos and no todosError we have no idea what
+    // went wrong, so throw an error.
+    const error = {
+      message: "An unknown error connecting to database has occurred.",
+    };
+    console.error(error);
+    next(error);
+  }
 }
