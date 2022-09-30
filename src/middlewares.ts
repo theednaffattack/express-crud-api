@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { httpStatusCodes } from "./api/response-codes";
 
-import ErrorResponse from "./interfaces/ErrorResponse";
-import { RequestValidators } from "./interfaces/RequestValidators";
+import ErrorResponse from "./interfaces/error-response";
+import { RequestValidators } from "./interfaces/request-validators";
 
 export function notFound(req: Request, res: Response, next: NextFunction) {
   res.status(404);

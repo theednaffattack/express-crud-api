@@ -86,3 +86,24 @@ export async function findAll(
     next(error);
   }
 }
+
+export async function findOne(
+  _req: Request,
+  res: Response<TodoTypeWithId>,
+  next: NextFunction
+) {
+  const [todo, todoErr] = await wrapAsync(() => TodosCollection.findOne());
+
+  // Deal with any errors
+  if (todoErr) {
+    console.error(todoErr);
+    next(todoErr);
+  }
+  if (todo) {
+    res.json(todo);
+  } else {
+    const retrieveTodoError = new Error("Unable to retrieve specified Todo.");
+    res.status(httpStatusCodes[422].code);
+    next(retrieveTodoError);
+  }
+}
