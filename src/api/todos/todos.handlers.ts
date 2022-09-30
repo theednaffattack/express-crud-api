@@ -3,7 +3,12 @@ import { InsertOneResult } from "mongodb";
 
 import { wrapAsync } from "../../utils/wrap-async";
 import { httpStatusCodes } from "../response-codes";
-import { Todo, TodosCollection, TodoType, TodoTypeWithId } from "./todos.model";
+import {
+  TodoSchema,
+  TodosCollection,
+  TodoType,
+  TodoTypeWithId,
+} from "./todos.model";
 
 export async function findAll(
   _req: Request,
@@ -37,12 +42,11 @@ export async function createOne(
   next: NextFunction
 ) {
   const [validationResult, validationError] = await wrapAsync(() =>
-    Todo.parseAsync(req.body)
+    TodoSchema.parseAsync(req.body)
   );
   // Handle validation errors
   if (validationError) {
     console.error(validationError);
-    res.status(httpStatusCodes[422].code);
     next(validationError);
   }
 
@@ -62,7 +66,7 @@ export async function createOne(
 
   // If our object passes validation insert it into the database
   const [insertedTodo, insertedTodoError] = await wrapAsync(() =>
-    TodosCollection.insertOne(validationResult)
+    TodosCollection.insertOne(req.body)
   );
 
   if (insertedTodoError) {
@@ -80,5 +84,5 @@ export async function createOne(
   // If all was successful respond with '201: "CREATED"'
   // Send JSON results back to the client
   res.status(httpStatusCodes[201].code);
-  res.json({ ...validationResult, _id: insertedTodo.insertedId });
+  res.json({ ...req.body, _id: insertedTodo.insertedId });
 }
