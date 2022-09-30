@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { InsertOneResult } from "mongodb";
+import { InsertOneResult, ObjectId } from "mongodb";
 import { ParamsWithIdType } from "../../interfaces/params-with-id";
 
 import { wrapAsync } from "../../utils/wrap-async";
@@ -89,16 +89,26 @@ export async function findAll(
 }
 
 export async function findOne(
-  _req: Request<ParamsWithIdType, TodoWithIdType>,
+  req: Request<ParamsWithIdType, TodoWithIdType, {}>,
   res: Response<TodoWithIdType>,
   next: NextFunction
 ) {
-  const [todo, todoErr] = await wrapAsync(() => TodosCollection.findOne());
+  const [todo, todoErr] = await wrapAsync(() =>
+    TodosCollection.findOne({ _id: new ObjectId(req.params.id) })
+  );
 
   // Deal with any errors
   if (todoErr) {
     console.error(todoErr);
     next(todoErr);
+  }
+  // If mongo can't find a Todo it returns 'null',
+  // which also occurs if there is a 'todoErr'. We'll
+  // test for both and if BOTH ARE NULL, we'll
+  // take that to mean the Todo cannot be found.
+  if (!todo && !todoErr) {
+    res.status(httpStatusCodes[404].code);
+    throw new Error(`Todo with id "${req.params.id}" not found.`);
   }
   if (todo) {
     res.json(todo);
