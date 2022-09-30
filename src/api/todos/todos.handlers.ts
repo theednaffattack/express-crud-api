@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { InsertOneResult } from "mongodb";
+import { ParamsWithIdType } from "../../interfaces/params-with-id";
 
 import { wrapAsync } from "../../utils/wrap-async";
 import { httpStatusCodes } from "../response-codes";
@@ -7,7 +8,7 @@ import {
   TodoSchema,
   TodosCollection,
   TodoType,
-  TodoTypeWithId,
+  TodoWithIdType,
 } from "./todos.model";
 
 export async function createOne(
@@ -64,7 +65,7 @@ export async function createOne(
 
 export async function findAll(
   _req: Request,
-  res: Response<TodoTypeWithId[]>,
+  res: Response<TodoWithIdType[]>,
   next: NextFunction
 ) {
   const result = TodosCollection.find();
@@ -88,8 +89,8 @@ export async function findAll(
 }
 
 export async function findOne(
-  _req: Request,
-  res: Response<TodoTypeWithId>,
+  _req: Request<ParamsWithIdType, TodoWithIdType>,
+  res: Response<TodoWithIdType>,
   next: NextFunction
 ) {
   const [todo, todoErr] = await wrapAsync(() => TodosCollection.findOne());
