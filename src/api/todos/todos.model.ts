@@ -8,7 +8,7 @@ export const TodoSchema = zod.object({
 });
 
 export type TodoType = zod.infer<typeof TodoSchema>;
-export type TodoTypeWithId = WithId<TodoType>;
+export type TodoWithIdType = WithId<TodoType>;
 
 export const TodosCollection = mongoDb.collection<TodoType>("todos");
 
