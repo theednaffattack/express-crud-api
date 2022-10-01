@@ -40,9 +40,6 @@ export const validateRequest = (validators: RequestValidators) => {
       }
       next();
     } catch (err) {
-      console.error("VALIDATION ERROR");
-      console.error(err);
-
       if (err instanceof ZodError) {
         res.status(httpStatusCodes[422].code);
       }

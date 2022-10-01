@@ -22,7 +22,6 @@ export async function createOne(
   );
   // Handle validation errors
   if (validationError) {
-    console.error(validationError);
     next(validationError);
   }
 
@@ -34,7 +33,7 @@ export async function createOne(
   // is possibly null.
   if (!validationResult) {
     const errMessage = "Unknown error parsing req.body";
-    console.error(errMessage);
+
     next(errMessage);
     // The return below stinks but otherwise TS throws an error below
     return;
@@ -46,7 +45,6 @@ export async function createOne(
   );
 
   if (insertedTodoError) {
-    console.error(insertedTodoError);
     res.status(httpStatusCodes[422].code);
     next(insertedTodoError);
   }
@@ -72,7 +70,6 @@ export async function findAll(
   const [todos, todosError] = await wrapAsync(() => result.toArray());
   // Deal with any errors
   if (todosError) {
-    console.error(todosError);
     next(todosError);
   }
   if (todos) {
@@ -83,7 +80,7 @@ export async function findAll(
     const error = {
       message: "An unknown error connecting to database has occurred.",
     };
-    console.error(error);
+
     next(error);
   }
 }
@@ -99,7 +96,6 @@ export async function findOne(
 
   // Deal with any errors
   if (todoErr) {
-    console.error(todoErr);
     next(todoErr);
   }
   // If mongo can't find a Todo it returns 'null',
