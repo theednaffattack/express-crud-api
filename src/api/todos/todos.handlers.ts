@@ -45,7 +45,7 @@ export async function createOne(
   );
 
   if (insertedTodoError) {
-    res.status(httpStatusCodes[422].code);
+    res.status(httpStatusCodes[422].code).send();
     next(insertedTodoError);
   }
 
@@ -103,14 +103,14 @@ export async function findOne(
   // test for both and if BOTH ARE NULL, we'll
   // take that to mean the Todo cannot be found.
   if (!todo && !todoErr) {
-    res.status(httpStatusCodes[404].code);
+    res.status(404).send();
     throw new Error(`Todo with id "${req.params.id}" not found.`);
   }
   if (todo) {
     res.json(todo);
   } else {
     const retrieveTodoError = new Error("Unable to retrieve specified Todo.");
-    res.status(httpStatusCodes[422].code);
+    res.status(httpStatusCodes[422].code).send();
     next(retrieveTodoError);
   }
 }
