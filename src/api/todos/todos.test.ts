@@ -94,11 +94,19 @@ describe("GET /api/v1/todos/:id", () => {
 });
 
 describe("GET /api/v1/todos/:id", () => {
-  it("Responds with a not found error", (done) => {
+  it("Responds with an invalid ObjectId error", (done) => {
     request(app)
-      .get(`/api/v1/todos/rtrewyrwyr}`)
+      .get(`/api/v1/todos/rtrewyrwyr`)
       .set("Accept", "application/json")
       .expect("Content-Type", /json/)
       .expect(codes[422].code, done);
   });
+
+  it("Responds with a not found error", (done) => {
+    request(app)
+      .get(`/api/v1/todos/6337986e306ba4fa7827768e`)
+      .set("Accept", "application/json")
+      .expect("Content-Type", /json/)
+      .expect(codes[404].code, done);
+  }, 6000);
 });
