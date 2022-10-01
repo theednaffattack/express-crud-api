@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { InsertOneResult } from "mongodb";
+import { InsertOneResult, ObjectId } from "mongodb";
+import { ParamsWithIdType } from "../../interfaces/params-with-id";
 
 import { wrapAsync } from "../../utils/wrap-async";
 import { httpStatusCodes } from "../response-codes";
@@ -7,33 +8,8 @@ import {
   TodoSchema,
   TodosCollection,
   TodoType,
-  TodoTypeWithId,
+  TodoWithIdType,
 } from "./todos.model";
-
-export async function findAll(
-  _req: Request,
-  res: Response<TodoTypeWithId[]>,
-  next: NextFunction
-) {
-  const result = TodosCollection.find();
-  const [todos, todosError] = await wrapAsync(() => result.toArray());
-  // Deal with any errors
-  if (todosError) {
-    console.error(todosError);
-    next(todosError);
-  }
-  if (todos) {
-    res.json(todos);
-  } else {
-    // If there are no todos and no todosError we have no idea what
-    // went wrong, so throw an error.
-    const error = {
-      message: "An unknown error connecting to database has occurred.",
-    };
-    console.error(error);
-    next(error);
-  }
-}
 
 export async function createOne(
   req: Request<{}, InsertOneResult<TodoType>, TodoType>,
@@ -46,7 +22,6 @@ export async function createOne(
   );
   // Handle validation errors
   if (validationError) {
-    console.error(validationError);
     next(validationError);
   }
 
@@ -58,7 +33,7 @@ export async function createOne(
   // is possibly null.
   if (!validationResult) {
     const errMessage = "Unknown error parsing req.body";
-    console.error(errMessage);
+
     next(errMessage);
     // The return below stinks but otherwise TS throws an error below
     return;
@@ -70,7 +45,6 @@ export async function createOne(
   );
 
   if (insertedTodoError) {
-    console.error(insertedTodoError);
     res.status(httpStatusCodes[422].code);
     next(insertedTodoError);
   }
@@ -85,4 +59,58 @@ export async function createOne(
   // Send JSON results back to the client
   res.status(httpStatusCodes[201].code);
   res.json({ ...req.body, _id: insertedTodo.insertedId });
+}
+
+export async function findAll(
+  _req: Request,
+  res: Response<TodoWithIdType[]>,
+  next: NextFunction
+) {
+  const result = TodosCollection.find();
+  const [todos, todosError] = await wrapAsync(() => result.toArray());
+  // Deal with any errors
+  if (todosError) {
+    next(todosError);
+  }
+  if (todos) {
+    res.json(todos);
+  } else {
+    // If there are no todos and no todosError we have no idea what
+    // went wrong, so throw an error.
+    const error = {
+      message: "An unknown error connecting to database has occurred.",
+    };
+
+    next(error);
+  }
+}
+
+export async function findOne(
+  req: Request<ParamsWithIdType, TodoWithIdType, {}>,
+  res: Response<TodoWithIdType>,
+  next: NextFunction
+) {
+  const [todo, todoErr] = await wrapAsync(() =>
+    TodosCollection.findOne({ _id: new ObjectId(req.params.id) })
+  );
+
+  // Deal with any errors
+  if (todoErr) {
+    next(todoErr);
+  }
+  // If mongo can't find a Todo it returns 'null',
+  // which also occurs if there is a 'todoErr'. We'll
+  // test for both and if BOTH ARE NULL, we'll
+  // take that to mean the Todo cannot be found.
+  if (!todo && !todoErr) {
+    res.status(httpStatusCodes[404].code);
+    throw new Error(`Todo with id "${req.params.id}" not found.`);
+  }
+  if (todo) {
+    res.json(todo);
+  } else {
+    const retrieveTodoError = new Error("Unable to retrieve specified Todo.");
+    res.status(httpStatusCodes[422].code);
+    next(retrieveTodoError);
+  }
 }

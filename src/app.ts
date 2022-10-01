@@ -5,7 +5,7 @@ import cors from "cors";
 
 import * as middlewares from "./middlewares";
 import { appRouter } from "./api/api";
-import MessageResponse from "./interfaces/MessageResponse";
+import MessageResponse from "./interfaces/message-response";
 
 require("dotenv").config();
 

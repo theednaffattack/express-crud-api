@@ -2,7 +2,7 @@ import request from "supertest";
 
 import app from "../../app";
 import { wrapAsync } from "../../utils/wrap-async";
-import { httpStatusCodes } from "../response-codes";
+import { httpStatusCodes as codes } from "../response-codes";
 import { TodosCollection } from "./todos.model";
 
 beforeAll(async () => {
@@ -10,6 +10,7 @@ beforeAll(async () => {
   const results = TodosCollection.find();
   const [todos, todosError] = await wrapAsync(() => results.toArray());
   if (todosError) {
+    console.error("BEFORE ALL 'todos.test.ts'");
     console.error(todosError);
   }
 
@@ -24,7 +25,7 @@ beforeAll(async () => {
       console.error("Error dropping collection for test", collDropError);
     }
     // Otherwise, success!
-    console.log("Success, your collection was dropped from the database");
+    console.log("Success! Your collection was dropped from the database.");
   }
 });
 
@@ -49,12 +50,14 @@ describe("POST /api/v1/todos", () => {
       .set("Accept", "application/json")
       .send({ content: "" })
       .expect("Content-Type", /json/)
-      .expect(httpStatusCodes[422].code)
+      .expect(codes[422].code)
       .then((response) => {
         expect(response.body).toHaveProperty("message");
       });
   });
 });
+
+let id: string;
 
 describe("POST /api/v1/todos", () => {
   it("Responds with an inserted object.", async () => {
@@ -63,12 +66,39 @@ describe("POST /api/v1/todos", () => {
       .set("Accept", "application/json")
       .send({ content: "Learn TypeScript", done: false })
       .expect("Content-Type", /json/)
-      .expect(httpStatusCodes[201].code)
+      .expect(codes[201].code)
       .then((response) => {
         expect(response.body).toHaveProperty("content");
         expect(response.body).toHaveProperty("done");
         expect(response.body).toHaveProperty("_id");
+        id = response.body._id;
         expect(response.body.content).toBe("Learn TypeScript");
       });
+  });
+});
+
+describe("GET /api/v1/todos/:id", () => {
+  it("Responds with a single Todo", async () => {
+    await request(app)
+      .get(`/api/v1/todos/${id}`)
+      .set("Accept", "application/json")
+      .expect(200)
+      .then((response) => {
+        expect(response.body).toHaveProperty("content");
+        expect(response.body).toHaveProperty("done");
+        expect(response.body._id).toBe(id);
+        expect(response.body).toHaveProperty("_id");
+        expect(response.body.content).toBe("Learn TypeScript");
+      });
+  });
+});
+
+describe("GET /api/v1/todos/:id", () => {
+  it("Responds with a not found error", (done) => {
+    request(app)
+      .get(`/api/v1/todos/rtrewyrwyr}`)
+      .set("Accept", "application/json")
+      .expect("Content-Type", /json/)
+      .expect(codes[422].code, done);
   });
 });
